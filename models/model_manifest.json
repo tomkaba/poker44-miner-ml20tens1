@@ -1,18 +1,18 @@
 {
     "schema_version": "1",
     "open_source": true,
-    "model_name": "poker44-gen20_1",
+    "model_name": "ml20tens1",
     "model_version": "20.1",
     "framework": "pytorch-torchscript",
     "license": "MIT",
     "repo_url": "https://github.com/tomkaba/poker44-miner-ml20tens1",
-    "repo_commit": "c6667975e7f68b2e087a790246e87ac732ad910c",
+    "repo_commit": "0ab581bf54acc41d1f2ceb0437cf5df5798fd647",
     "inference_mode": "local",
-    "training_data_statement": "Uses the gen20_new_10k_92_vote101_hardened TorchScript artifact with the default decision threshold set to 0.5.",
+    "training_data_statement": "Uses the gen20_tens1_7k_vote101_hardened TorchScript artifact with the default decision threshold set to 0.5 and prod-like runtime preprocessing.",
     "data_attestation": "This miner does not train on validator-private human data.",
     "private_data_attestation": "This miner does not train on validator-private human data.",
     "implementation_files": [
-        "weights/gen20_new_10k_92_vote101_hardened.ts",
+        "weights/gen20_tens1_7k_vote101_hardened.ts",
         "neurons/miner.py",
         "start_miner.sh",
         "poker44/__init__.py",
@@ -24,6 +24,6 @@
         "poker44/utils/model_manifest.py",
         "poker44/validator/synapse.py"
     ],
-    "implementation_sha256": "657220b467de85b46cdd6d5b52119c681c68ab3941512c26536241a53b5fc186",
-    "notes": "Gen20_1 TorchScript neural network scorer using the gen20_new_10k_92_vote101_hardened artifact with default decision threshold 0.5."
+    "implementation_sha256": "15053d81f10c506c64c6f9559ea224644d18f79b169b91b66bd78c614db3a733",
+    "notes": "ml20tens1 TorchScript neural network scorer using the gen20_tens1_7k_vote101_hardened artifact with default decision threshold 0.5 and prod-like runtime preprocessing."
 }

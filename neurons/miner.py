@@ -35,6 +35,24 @@ EXTRA_ALLOWED_VALIDATOR_HOTKEYS = {
     "5FZD47WhA1UaVicYAr7pGnWb2YQLMD7uViipDYN2r1AJ5ggD",
 }
 
+RUNTIME_MODEL_RELATIVE_PATH = Path("weights") / "gen20_tens1_7k_vote101_hardened.ts"
+
+
+def _runtime_implementation_files(repo_root: Path) -> List[Path]:
+    return [
+        repo_root / RUNTIME_MODEL_RELATIVE_PATH,
+        Path(__file__).resolve(),
+        repo_root / "start_miner.sh",
+        repo_root / "poker44" / "__init__.py",
+        repo_root / "poker44" / "base" / "miner.py",
+        repo_root / "poker44" / "base" / "neuron.py",
+        repo_root / "poker44" / "miner_heuristics.py",
+        repo_root / "poker44" / "utils" / "config.py",
+        repo_root / "poker44" / "utils" / "misc.py",
+        repo_root / "poker44" / "utils" / "model_manifest.py",
+        repo_root / "poker44" / "validator" / "synapse.py",
+    ]
+
 
 def _load_env_file():
     """Load .env file from current directory or parent directories."""
@@ -90,7 +108,7 @@ class Miner(BaseMinerNeuron):
 
         try:
             git_commit = subprocess.check_output(
-                ["git", "-C", str(repo_root), "rev-parse", "HEAD"],
+                ["git", "-C", str(repo_root), "rev-parse", "HEAD~1"],
                 stderr=subprocess.DEVNULL,
                 timeout=5,
             ).decode().strip()
@@ -99,30 +117,18 @@ class Miner(BaseMinerNeuron):
 
         self.model_manifest = build_local_model_manifest(
             repo_root=repo_root,
-            implementation_files=[
-                repo_root / "weights" / "gen20_new_10k_92_vote101_hardened.ts",
-                Path(__file__).resolve(),
-                repo_root / "start_miner.sh",
-                repo_root / "poker44" / "__init__.py",
-                repo_root / "poker44" / "base" / "miner.py",
-                repo_root / "poker44" / "base" / "neuron.py",
-                repo_root / "poker44" / "miner_heuristics.py",
-                repo_root / "poker44" / "utils" / "config.py",
-                repo_root / "poker44" / "utils" / "misc.py",
-                repo_root / "poker44" / "utils" / "model_manifest.py",
-                repo_root / "poker44" / "validator" / "synapse.py",
-            ],
+            implementation_files=_runtime_implementation_files(repo_root),
             defaults={
-                "model_name": "poker44-gen20_1",
+                "model_name": "ml20tens1",
                 "model_version": "20.1",
                 "framework": "pytorch-torchscript",
                 "license": "MIT",
                 "repo_url": "https://github.com/tomkaba/poker44-miner-ml20tens1",
                 "repo_commit": git_commit,
-                "notes": "Gen20_1 TorchScript neural network scorer using the gen20_new_10k_92_vote101_hardened artifact with default decision threshold 0.5.",
+                "notes": "ml20tens1 TorchScript neural network scorer using the gen20_tens1_7k_vote101_hardened artifact with default decision threshold 0.5 and prod-like runtime preprocessing.",
                 "open_source": True,
                 "inference_mode": "local",
-                "training_data_statement": "Uses the gen20_new_10k_92_vote101_hardened TorchScript artifact with the default decision threshold set to 0.5.",
+                "training_data_statement": "Uses the gen20_tens1_7k_vote101_hardened TorchScript artifact with the default decision threshold set to 0.5 and prod-like runtime preprocessing.",
                 "private_data_attestation": "This miner does not train on validator-private human data.",
                 "data_attestation": "This miner does not train on validator-private human data.",
             },
@@ -200,7 +206,7 @@ class Miner(BaseMinerNeuron):
             chunks=chunks,
         )
 
-        bt.logging.info(f"Scored {len(chunks)} chunks with scorer gen20_1.")
+        bt.logging.info(f"Scored {len(chunks)} chunks with scorer ml20tens1.")
         return synapse
 
     @staticmethod
@@ -311,6 +317,6 @@ if __name__ == "__main__":
         bt.logging.info("Miner running...")
         while True:
             bt.logging.info(
-                f"Miner UID: {miner.uid} | Incentive: {float(miner.metagraph.I[miner.uid])} | Scorer: gen20_1"
+                f"Miner UID: {miner.uid} | Incentive: {float(miner.metagraph.I[miner.uid])} | Scorer: ml20tens1"
             )
             time.sleep(60)

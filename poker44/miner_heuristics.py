@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import math
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -10,7 +11,20 @@ import numpy as np
 import torch
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-RUNTIME_MODEL_PATH = REPO_ROOT / "weights" / "gen20_new_10k_92_vote101_hardened.ts"
+RUNTIME_MODEL_PATH = REPO_ROOT / "weights" / "gen20_tens1_7k_vote101_hardened.ts"
+
+SUPPORTED_ACTION_TYPES = {"bet", "call", "check", "fold", "raise"}
+SUPPORTED_STREETS = {"flop", "preflop", "river", "turn"}
+DROP_NUMERIC_FIELDS = {"call_to", "raise_to"}
+MAX_ACTIONS_PER_HAND = 12
+SCALING_REFERENCE_MAX = {
+    "amount": 2.52,
+    "raise_to": 1.7624,
+    "call_to": 1.1466,
+    "normalized_amount_bb": 126.0,
+    "pot_before": 2.52,
+    "pot_after": 2.52,
+}
 
 ACTION_MAP = {
     "fold": 1,
@@ -42,6 +56,59 @@ def _safe_float(value: object) -> float:
         return float(value)
     except Exception:
         return 0.0
+
+
+def _to_float(value: object) -> float | None:
+    if isinstance(value, (int, float)):
+        return float(value)
+    return None
+
+
+def _scale_numeric_value(value: float, reference_max: float) -> float:
+    if reference_max <= 0.0:
+        return value
+    if value <= 0.0:
+        return 0.0
+    return float(math.log1p(value) / math.log1p(reference_max))
+
+
+def _preprocess_runtime_chunk(chunk: List[dict]) -> List[dict]:
+    transformed_hands: List[dict] = []
+    for hand in chunk:
+        raw_actions = hand.get("actions") or []
+        raw_actions = raw_actions[:MAX_ACTIONS_PER_HAND]
+
+        transformed_actions: List[dict] = []
+        for action in raw_actions:
+            action_type = str(action.get("action_type") or "").lower()
+            street = str(action.get("street") or "").lower()
+            if action_type not in SUPPORTED_ACTION_TYPES:
+                continue
+            if street and street not in SUPPORTED_STREETS:
+                continue
+
+            transformed_action = dict(action)
+            for field in DROP_NUMERIC_FIELDS:
+                transformed_action.pop(field, None)
+
+            for field, reference_max in SCALING_REFERENCE_MAX.items():
+                if field in DROP_NUMERIC_FIELDS:
+                    continue
+                value = _to_float(transformed_action.get(field))
+                if value is None:
+                    continue
+                transformed_action[field] = _scale_numeric_value(value, reference_max)
+
+            transformed_actions.append(transformed_action)
+
+        if not transformed_actions:
+            continue
+
+        transformed_hand = dict(hand)
+        transformed_hand["actions"] = transformed_actions
+        transformed_hands.append(transformed_hand)
+
+    return transformed_hands
 
 
 def _runtime_shape() -> Tuple[int, int]:
@@ -137,7 +204,11 @@ def score_chunk_runtime_with_route(chunk: List[dict]) -> Tuple[float, str]:
 
     try:
         max_hands, max_actions = _runtime_shape()
-        enc = _encode_chunk(chunk, max_hands=max_hands, max_actions=max_actions)
+        preprocessed_chunk = _preprocess_runtime_chunk(chunk)
+        if not preprocessed_chunk:
+            return 0.5, "empty_after_preprocess"
+
+        enc = _encode_chunk(preprocessed_chunk, max_hands=max_hands, max_actions=max_actions)
 
         x = {}
         for k, v in enc.items():

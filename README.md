@@ -1,8 +1,8 @@
-# Poker44-gen20_1
+# ml20tens1
 
 Minimal release repository for Poker44 miner runtime scoring.
 
-This repository is a standalone miner variant prepared for production rollout with the gen20_new_10k_92_vote101_hardened TorchScript scorer and the default 0.5 decision threshold.
+This repository is a standalone miner variant prepared for production rollout with the gen20_tens1_7k_vote101_hardened TorchScript scorer, prod-like runtime preprocessing, and the default 0.5 decision threshold.
 
 ## Quick start
 
@@ -32,14 +32,14 @@ or legacy wrapper:
 - Launcher: start_miner.sh
 - Scorer entrypoint: poker44/miner_heuristics.py
 - Entry point: neurons/miner.py
-- Runtime model: weights/gen20_new_10k_92_vote101_hardened.ts
+- Runtime model: weights/gen20_tens1_7k_vote101_hardened.ts
 
-Base release lineage: gen20tens0 with TorchScript artifact replaced by gen20_new_10k_92_vote101_hardened and decision threshold kept at the default 0.5.
+Base release lineage: ml20tens1 with the gen20_tens1_7k_vote101_hardened artifact and decision threshold kept at the default 0.5.
 
 Manifest implementation SHA256 is computed from:
 
 - start_miner.sh
-- weights/gen20_new_10k_92_vote101_hardened.ts
+- weights/gen20_tens1_7k_vote101_hardened.ts
 - neurons/miner.py
 - poker44/__init__.py
 - poker44/base/miner.py
