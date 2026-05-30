@@ -6,7 +6,7 @@
     "framework": "pytorch-torchscript",
     "license": "MIT",
     "repo_url": "https://github.com/tomkaba/poker44-miner-ml20tens1",
-    "repo_commit": "b6c2cf44ed16fe698d1a44c9e18986a276ae8d6e",
+    "repo_commit": "66a842c5d2f3577831afc9cb8d632f2e8f5ae5bb",
     "inference_mode": "local",
     "training_data_statement": "Uses the gen20_tens1_7k_vote101_hardened TorchScript artifact with the default decision threshold set to 0.5 and prod-like runtime preprocessing.",
     "data_attestation": "This miner does not train on validator-private human data.",
@@ -24,6 +24,6 @@
         "poker44/utils/model_manifest.py",
         "poker44/validator/synapse.py"
     ],
-    "implementation_sha256": "d93f60c6ee1213949b4c96d41cffff0b927c813f37f5f118cf0e9538e6def79b",
+    "implementation_sha256": "e0f04dbe02ed9b3da682e1666e2deacec3f57210be06c3b7e12c11cf5771232e",
     "notes": "ml20tens1 TorchScript neural network scorer using the gen20_tens1_7k_vote101_hardened artifact with default decision threshold 0.5 and prod-like runtime preprocessing."
 }
